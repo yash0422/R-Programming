@@ -1,0 +1,21 @@
+
+Playing around with the dataset (Data wrangling and EDA)
+
+1) Read the dataset in R using read.csv, read.xlsx etc or scrap datasets from the website. Knowledge of data types - Static/Dynamic/Hard/Soft/Structured/Un-structured
+
+2) Understand the dataset very clearly - how many rows and columns does it have. Use the commands in R such as dim, class,
+   nrow, ncol, head, tail, names, str and summary that will help in understanding better.
+
+3) Do data manipulation operations such as filter, subset, aggregate, table, apply, dplyr packages etc. with the dataset.
+
+4) Understand missing values and techniques to encounter them.
+
+5) Play with data visualizations and do EDA using R packages such as ggplot2 - univariate & bivariate analysis
+
+7) Some tidbits on normalization techniques such as log, exponential, sqrt etc.
+
+HTML (the Hypertext Markup Language) and CSS (Cascading Style Sheets) are two of the core technologies for building Web pages. 
+HTML provides the structure of the page, CSS the (visual and aural) layout, for a variety of devices. 
+Along with graphics and scripting, HTML and CSS are the basis of building Web pages and Web Applications.
+
+selector gadget for chrome

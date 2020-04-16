@@ -1,0 +1,404 @@
+---
+title: 'Class 3: Data Acquisition, Wrangling, Exploration'
+author: "Nile"
+date: "November 9, 2019"
+output: html_document
+---
+` is called as acute or left quote
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+```{r}
+# Lets use this R chunk to load required libraries and set project working directory
+
+# This library is used for formating text(bold, color fonnt, font size etc)
+#install.packages("kableExtra")
+library(kableExtra)
+
+# Set working directory
+setwd("E:/Eudreka/003-EDA/")
+
+```
+
+We will use IMDB Movies dataset which has data of about 5000 odd movies.  
+Using this dataset we will solve some of the tasks given below to cover today's topic.  
+
+1. `r text_spec("Know top 10 movies with the highest profit ?",color="blue")`
+2. `r text_spec("Know top rated movies in the list and also average IMDB score ?",color="blue")`
+3. `r text_spec("Plot a graphical representation to show number of movies  release each year ?",color="blue")`
+
+## Phase 1 : DATA ACQUISITION
+In this phase, based on the source from where we have to gather data, we write R code to acquire them.  
+
+*So of the type of acquisition can be from:*
+
+1. CSV(at rest)
+2. CSV(from web) 
+3. Excel
+4. MySQL database
+5. WebScraping (unstrcutred)
+6. XML
+7. JSON
+8. API
+
+Lets, now write command to acquire data from above source types  
+
+
+```{r }
+# Load CSV file from WEB
+url = "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.csv?accessType=DOWNLOAD"
+download.file(url,destfile = "Cameras.csv" )
+
+camera_data = read.csv("Cameras.csv",header=TRUE)
+head(camera_data,10)
+```
+
+
+```{r }
+# Load Excel File
+#install.packages("readxl")
+library(readxl)
+
+movie_data = read_xlsx("movie_metadata_excel.xlsx",sheet = "movie_metadata")
+head(movie_data,10)
+tail(movie_data,10)
+```
+
+
+```{r }
+# Load CSV file at rest
+movie_data = read.csv("movie_metadata.csv",header=TRUE)
+head(movie_data)
+str(movie_data)
+
+my_dataframe = as.data.frame(matrix(nrow = 3,ncol=4))
+my_dataframe
+
+```
+
+
+```{r }
+# # # Load from mySQL Database
+# 
+#install.packages("RMySQL")
+ library(RMySQL)
+
+ myDBConnection = dbConnect(MySQL(),user="genome",db="hg19",host="genome-mysql.cse.ucsc.edu")
+# 
+# # Get list of all tables
+ allTableNames = dbListTables(myDBConnection)
+ head(allTableNames)
+# 
+# #get records from certain tables
+ dbGetQuery(myDBConnection,"select count(*) from affyCytoScan") #affyU133Plus2
+ dbDisconnect(myDBConnection)
+```
+
+
+```{r}
+# library(RJDBC)
+# 
+# library(RODBC)
+# 
+# #Database connection settings:
+# driverClassName="com.Hana.jdbc.Driver"
+# driverPath="mysql-connector-java-5.1.26.jar"
+# dbConnectionString="jdbc:mysql://hostname:port/schemaname"
+# userID="root"
+# pwd="root"
+# 
+# #Importing the dataset
+# driver=JDBC(driverClassName,driverPath)
+```
+
+
+```{r}
+# Load data using webscrapping
+#install.packages("XML")
+#library(RCurl)
+library(XML)
+url = "http://news.bbc.co.uk/2/hi/uk_politics/8044207.stm"
+#url_obj = getURL(url)
+html_doc = htmlParse(url) 
+html_table = readHTMLTable(html_doc)
+html_table[[2]]
+
+```
+
+```{r}
+# Load data from XML
+
+#install.packages("xml2")
+library(xml2)
+xml_doc = read_xml("http://www.w3schools.com/xml/simple.xml")
+rootNode = xml_root(xml_doc)
+xml_name(rootNode)
+
+```
+
+#####   Heavy load, avoid executing !!!!!
+```{r}
+# Load data from JSON
+#install.packages("RJSONIO")
+library(RJSONIO)
+
+json_data = fromJSON("https://data.ny.gov/api/views/9a8c-vfzj/rows.json?accessType=DOWNLOAD")
+
+market_data = json_data[['data']]
+market_data[[1]][[14]]
+market_data[[2]][[14]]
+
+```
+
+We have now acquired the raw data, we will have to now make sure that data is clean and thus prepare it for model.  
+  
+
+## Phase 2 : DATA PREPARATION
+
+This phase multiple sub-phases like :  
+
+1. **Data Wrangling** : Here we do cleaning, standardize, derive or remove unwanted columns
+  + Data subsetting
+  + Data filtering
+  + Removing null values
+  + Text manipulation
+
+2. **Data Exploration** : Here we explore and understand data
+  + Find number of row and columns in dataset
+  + Understanding and displaying intial top and last records of datset
+  + Understanding and displaying names of columns
+  + Understanding the structure of the dataset
+  + Understading various categories/levels of a catagorical variable
+  + Display all the records of dataset
+  
+3. **Data Visualization** : Here we do visual representation of data
+  + Boxplot
+  + Histogram
+  + Scatter plot
+
+  
+
+## Data Wrangling
+```{r}
+# str(movie_data)
+# direct_name = as.character(movie_data$director_name)
+# head(direct_name)
+# (direct_name)
+# class(movie_data$color)
+
+# Write R code for Data Wrangling
+
+# Sampling of data
+dim(movie_data)
+names(movie_data)
+movie_data[3,c("actor_3_name","actor_3_facebook_likes")]
+movie_data[r,c]
+
+color_movies = movie_data[movie_data[ ,"color"]=="Color",]
+dim(color_movies)
+
+```
+
+```{r}
+# Filtering of Data
+# Filter only director_name and director_facebook_likes
+names(movie_data)
+onlyDirName_likes_data = movie_data[  ,c(2,5)] # OR
+onlyDirName_likes_data = movie_data[,c("director_name","director_facebook_likes")]
+dim(onlyDirName_likes_data)
+head(onlyDirName_likes_data)
+
+temp_1 = movie_data[,2:5]
+names(temp_1)
+dim(temp_1)
+
+
+temp_2 = movie_data[2:5,2:5]
+names(temp_2)
+dim(temp_2)
+
+```
+
+```{r}
+# Cleaning : Removing records which have NA(Blank)
+
+# Identifying if dataset have NA 
+anyNA(movie_data)
+
+# Which cells have NA
+head(is.na(movie_data))
+
+# Identidy which columns have how many NA's
+colSums(is.na(movie_data))
+
+movie_data_clean = na.omit(movie_data)
+
+anyNA(movie_data_clean)
+dim(movie_data_clean)
+dim(movie_data)
+str(movie_data_clean)
+
+```
+
+```{r}
+head(movie_data)
+
+# Text Manipulation
+head(movie_data_clean$movie_title)
+
+# remove unwanted text from dataset
+movie_data_clean$movie_title = sub(pattern = "Â",replacement = "",x = movie_data_clean$movie_title)
+
+head(movie_data_clean$movie_title)
+head(trimws(movie_data_clean$movie_title))
+
+class(movie_data_clean$movie_title)
+
+
+#movie_data_clean$movie_title = trimws(movie_data_clean$movie_title,which = "both")
+
+```
+
+## Data Exploration
+```{r}
+# Write R code for Data Exploration/Analysis
+dim(movie_data_clean)
+
+nrow(movie_data_clean)
+ncol(movie_data_clean)
+
+head(movie_data_clean)
+tail(movie_data_clean)
+
+names(movie_data_clean)
+
+str(movie_data_clean)
+
+levels(movie_data_clean$color)
+
+summary(movie_data_clean)
+
+#strptime(dataset_original$Date,format="%d-%b-%y")
+
+
+```
+
+# Lets work on Film Release date 
+
+```{r}
+
+class(movie_data_clean$release_date)
+head(movie_data_clean$release_date)
+
+movie_data_clean$release_date = strptime(movie_data_clean$release_date,format="%d-%m-%Y")
+
+head(movie_data_clean$release_date)
+
+library(lubridate)
+movie_data_clean$start_month =   month(movie_data_clean$release_date)
+movie_data_clean$start_day = day(movie_data_clean$release_date)
+movie_data_clean$start_hour = hour(movie_data_clean$release_date)
+movie_data_clean$start_wday = weekdays(movie_data_clean$release_date)
+
+head(movie_data_clean)
+
+
+```
+
+We are in position to solve the 1st to problems now...  
+1. `r text_spec("Know top 10 movies with the highest profit ?",color="blue")`  
+
+```{r}
+# We will take cleaned dataset
+str(movie_data_clean)
+
+movie_data_clean$profit = movie_data_clean$gross - movie_data_clean$budget
+head(movie_data_clean$profit,10)
+
+movie_data_clean = movie_data_clean[order(-movie_data_clean$profit),]
+
+head(movie_data_clean$profit,10)
+
+#cbind(movie_title,profit)
+
+head(cbind(movie_data_clean$profit,movie_data_clean$movie_title),10)
+
+```
+
+2. `r text_spec("Know top rated movies in the list and also average IMDB score ?",color="blue")`
+```{r}
+# Top 10 movies my IMDB ratings/score
+movie_data_clean = movie_data_clean[order(-movie_data_clean$imdb_score),]
+head(cbind(movie_data_clean$movie_title,movie_data_clean$imdb_score),10)
+
+# Average of imdb_score
+mean(movie_data_clean$imdb_score)
+
+```
+
+
+## Data Visualization
+  
+```{r}
+#Boxplot
+boxplot(movie_data_clean$imdb_score,horizontal = TRUE)
+
+```
+
+```{r}
+# Histogram
+
+hist(movie_data_clean$title_year)
+
+```
+  
+```{r}
+# Scatter plot
+plot(movie_data_clean$duration)
+
+```
+
+  
+3. `r text_spec("Plot a graphical representation to show number of movies  release each year ?",color="blue")`  
+
+```{r}
+# Write R code for Data Visualization
+# Histogram
+max(movie_data_clean$title_year,na.rm = TRUE)
+min(movie_data_clean$title_year,na.rm=TRUE)
+m_breaks = seq(min(movie_data_clean$title_year,na.rm=TRUE),max(movie_data_clean$title_year,na.rm = TRUE), by=1)
+hist(movie_data_clean$title_year,breaks=m_breaks)
+hist_data = hist(movie_data_clean$title_year,breaks=m_breaks)
+
+#Index of years where highest movies
+#temp = hist_data[order(-hist_data$counts),]
+which.max(hist_data$counts)
+hist_data$mids[82]
+
+```
+
+
+```{r}
+
+#
+library(ggplot2)
+ggplot(movie_data_clean,aes(x=title_year)) + geom_bar()
+ggplot(movie_data_clean,aes(x=title_year)) + geom_bar()
+
+
+library(dplyr)
+# select title_year, count(*) FilmCOunt from movie_data_clean group by title_year order filmcount desc
+
+NumberOfReleasesPerYear = movie_data_clean %>% select(title_year) %>%
+                          group_by(title_year) %>%
+                          summarise(FilmCount =n() ) %>% arrange(desc(FilmCount))
+
+head(NumberOfReleasesPerYear)
+
+```
+
+
