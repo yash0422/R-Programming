@@ -1,0 +1,93 @@
+---
+title: "Model_04_Logistic_Regression"
+author: "Vishal Desai"
+date: "4/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+LOGISTIC REGRESSION:
+
+Analyze the information given in the Employee_Data dataset and predict the values using logistic regression model. The dataset can be loaded using this link:
+
+https://www.edureka.co/medias/fdzs9gyrw1/download?media_file_id=189951110
+
+```{r cars}
+# SET WORKING DIRECTORY
+getwd()
+setwd('C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/004 INTRO TO MACHINE LEARNING')
+getwd()
+```
+
+```{r}
+# Load CSV file from WEB
+url = "https://www.edureka.co/medias/fdzs9gyrw1/download?media_file_id=189951110"
+
+download.file(url, destfile = "Employee_Data.csv" )
+
+employee_data = read.csv("Employee_Data.csv", header = TRUE)
+head(employee_data,10)
+str(employee_data)
+```
+
+# Divide the Data in Training and Testing
+
+```{r}
+
+# TRAIN_TEST SPLIT
+
+set.seed(2)
+library(caTools)
+emp = sample.split(as.numeric(employee_data$Emp_Sal), SplitRatio = 0.7)
+trainset = subset(employee_data, emp=="TRUE")
+testset = subset(employee_data, emp=="FALSE")
+
+```
+
+```{r}
+
+# MODEL BUILDING
+
+colnames(employee_data)
+model2 = glm(Emp_Sal ~., data = trainset, family = "binomial")
+summary(model2)
+
+```
+
+```{r}
+
+# PREDICTION
+
+pred = predict(model2, newdata = testset, type = "response")
+pred
+length(pred)
+nrow(testset)
+
+```
+
+```{r}
+
+# CONFUSION MATRIX
+table(ActialValues = testset$Emp_Sal, PredictedVal = pred > 0.3)
+# > (6305+1836)/9768 = 0.8334357
+table(ActialValues = testset$Emp_Sal, PredictedVal = pred > 0.7)
+# (7254+950)/9768 = 0.8398853
+
+```
+
+```{r}
+
+# ROC (Receiver Operating Charactertic)
+
+library(ROCR)
+ROCpred = prediction(pred, testset$Emp_Sal)
+
+ROCperf = performance(ROCpred, "tpr", "fpr")
+
+plot(ROCperf, col = "blue", print.cutoffs.at = seq(0.1, by = 0.1),
+     text.adj = c(-0.5, 1.7), cex = 0.9)
+
+```
