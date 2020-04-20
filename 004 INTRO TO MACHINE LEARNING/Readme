@@ -1,0 +1,47 @@
+Module 4: Introduction to Machine Learning
+Assignment
+
+Linear Regression:
+Analyze the information given in the Video_games dataset and predict the values using linear regression model.
+
+The description of the attributes in the dataset are as follows:
+  • Name of the video game – text, each row depicts name of the video game
+  • Platform – platform on which game runs.
+  • NA_Sales – numeric variable, sales in North America for the respective games.
+  • EU_Sales – numeric variable, sales in Europe for the respective games.
+  • JP_Sales – numeric variable, sales in Japan for the respective games.
+  • Other_Sales – numeric variable, aggregate sum of sales in other parts of the world, for the respective games.
+
+Perform the following tasks on the dataset
+
+Task 1: Using the sales columns of our data
+  → Create a test set and training set
+  → Create a new linear regression model using train set.
+  → Predict the values for other sales for the test
+
+Task 2: Plot the values predicted by our model and the actual values to check deviation between them
+  → Create a subset of 100 values so that you can see the plot clearly
+  → Plot the actual values from the test set in black
+  → And plot the predicted values in red so that we can differentiate between them clearly.
+  
+  - - - - - - - - - - - - - - - - - -
+  
+Logistic Regression:
+
+Analyze the information given in the Employee_Data dataset and predict the values using logistic regression model.
+
+The description of the attributes in the dataset are as follows:
+  • Edu_of_Emp – gives the education level of the employees
+  • marital_satus – gives whether one is single, married, separated, divorced, or widowed. • Occ_of_Emp – give the occupation of employees like manager, cleaner, professor etc.
+  • Emp_rel_status – gives the relation status of the employee like Husband, wife, not in family.
+  • Work_hour_in_week – gives the number of hours the employee worked in a week.
+  • Emp_sal – gives the salary range, >50k or<=50k
+  
+Perform the following tasks on the dataset
+
+Task 1: Using the Emp_sal column of our data create a logistic regression model
+  → Create a test set and training set
+  → Build a model using all other columns and predict the values.
+  → Create a confusion matrix with cut off value as 0.4
+  
+  
