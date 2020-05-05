@@ -1,0 +1,266 @@
+---
+title: 'Class 4 : Linear & Logistic Regression'
+author: "Nile"
+date: "November 5, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Linear Regression Model
+
+```{r}
+library(MASS)
+#data(Boston)
+boston_data = Boston
+names(boston_data)
+help(Boston)
+  # CRIM: Per capita crime rate by town
+  # ZN: Proportion of residential land zoned for lots over 25,000 sq. ft
+  # INDUS: Proportion of non-retail business acres per town
+  # CHAS: Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+  # NOX: Nitric oxide concentration (parts per 10 million)
+  # RM: Average number of rooms per dwelling
+  # AGE: Proportion of owner-occupied units built prior to 1940
+  # DIS: Weighted distances to five Boston employment centers
+  # RAD: Index of accessibility to radial highways
+  # TAX: Full-value property tax rate per $10,000
+  # PTRATIO: Pupil-teacher ratio by town
+  # B: 1000(Bk - 0.63)?, where Bk is the proportion of [people of African American descent] by town
+  # LSTAT: Percentage of lower status of the population
+  # MEDV: Median value of owner-occupied homes in per $1000s
+
+names(boston_data$crim) = "per_capita_crime_rate"
+names(boston_data) = c("per_capita_crime_rate","residential_zone_prop","industrial_prop",
+                       "charles_river_tract","nirous_oxide_conc","avg_rooms_per_home",
+                       "ower_age_prop","weighted_distance_employment_center",
+                       "access_to_radial_highways_index","property_tax_rate_per_10k",
+                       "pupil_teacher_ratio","African_American_prop","lower_status_population_percentage",
+                       "median_owner_occupied_home_in_1k"
+                       )
+
+
+names(boston_data)
+str(boston_data)
+summary(boston_data)
+boston_data$charles_river_tract = as.factor(boston_data$charles_river_tract)
+
+dim(boston_data)
+
+```
+
+# Bivariate analysis : Strength of relationship
+```{r}
+library(corrplot)
+numeric_dataset = boston_data[,-4]
+cor(numeric_dataset)
+
+corrplot(cor(numeric_dataset),method =  "number",type = "lower")
+
+library(psych)
+pairs.panels(bostan_data)
+
+```
+# Observation:
+1 
+2
+
+
+# Train & Test Dataset
+```{r}
+library(caTools)
+set.seed(1234)
+index = sample.split(boston_data, SplitRatio = 0.7)
+str(boston_data)
+index
+training_data = subset(boston_data, index==TRUE)
+testing_data = subset(boston_data, index==FALSE)
+
+
+dim(boston_data)
+dim(training_data)
+dim(testing_data)
+
+```
+
+# Linear model 
+```{r}
+names(training_data)
+library(car)
+linear_model = lm(median_owner_occupied_home_in_1k ~ . ,training_data)
+
+summary(linear_model)
+
+linear_model_1 = lm(median_owner_occupied_home_in_1k~. -industrial_prop -charles_river_tract -ower_age_prop, training_data)
+
+summary(linear_model_1)
+
+```
+
+# Linear model : Back-tracing validation
+```{r}
+pred_train_medv = predict(linear_model,training_data)
+head(pred_train_medv)
+
+plot(training_data$median_owner_occupied_home_in_1k, type="l", col="green")
+lines(pred_train_medv, col="blue")
+```
+
+# Training Dataset : Model performance : Back-tracing 
+```{r}
+# Backtrace model performance with testing dataset actuals 
+install.packages("Metrics")
+library(Metrics)
+trained_mse = mse(training_data$median_owner_occupied_home_in_1k,pred_train_medv)
+trained_rmse = rmse(training_data$median_owner_occupied_home_in_1k,pred_train_medv)
+trained_mape = mape(training_data$median_owner_occupied_home_in_1k,pred_train_medv)
+
+trained_r2 = summary(linear_model)$r.squared
+
+training_model_perf = cbind(Dataset="TrainingDS",
+                           MSE=round(trained_mse,3),
+                           RMSE=round(trained_rmse,3),
+                           MAPE=round(trained_mape,3),
+                           R2=round(trained_r2,3))
+training_model_perf
+```
+
+
+# Linear model - Prediction based on unknown - (Testing Dataset)
+
+```{r}
+# using test data
+pred_test_medv = predict(linear_model,testing_data)
+
+```
+
+# Compare actual vs predict test data values
+```{r}
+plot(testing_data$median_owner_occupied_home_in_1k,type="l", col="green")
+lines(pred_test_medv,col="blue")
+```
+
+# Testing Dataset : Model performance : Evaluation
+```{r}
+test_mse = mse(testing_data$median_owner_occupied_home_in_1k,pred_test_medv)
+test_rmse = rmse(testing_data$median_owner_occupied_home_in_1k,pred_test_medv)
+test_mape = mape(testing_data$median_owner_occupied_home_in_1k,pred_test_medv)
+
+test_r2 = cor(testing_data$median_owner_occupied_home_in_1k,pred_test_medv)^2
+testing_model_perf = cbind(Dataset="TestDS",
+                           MSE=round(test_mse,3),
+                           RMSE=round(test_rmse,3),
+                           MAPE=round(test_mape,3),
+                           R2=round(test_r2,3))
+testing_model_perf
+
+```
+
+# Compare Training vs Testing DS : Model performace
+
+```{r}
+rbind(training_model_perf,testing_model_perf)
+
+```
+
+
+##########################################################################################
+# LOGISTIC REGRESSION
+
+```{r}
+rm(list=ls())
+install.packages("memisc")
+library(memisc)
+
+setwd("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/004 INTRO TO MACHINE LEARNING/Linear_LogisticRegression_Code_tqow5")
+diabetic_data = read.csv("Diabetes.csv",header=TRUE,stringsAsFactors = FALSE)
+str(diabetic_data)
+
+diabetic_data$Is_Diabetic_Flag =factor(diabetic_data$Is_Diabetic)
+
+# binning
+diabetic_data$age_bins = cut(diabetic_data$Age, 
+                             breaks = c(18,25,35,65,100 ), 
+                              labels=c(">25","25-35","35-65",">65"))
+head(diabetic_data)
+str(diabetic_data)
+diabetic_data = diabetic_data[,-which(colnames(diabetic_data)=="Is_Diabetic")]
+diabetic_data =diabetic_data[,-which(colnames(diabetic_data)=="Age")]
+str(diabetic_data)
+
+```
+
+## Logit : Trainig and Test Dataset
+
+```{r}
+library(caTools)
+set.seed(100)
+index = sample.split(diabetic_data, SplitRatio = 0.7)
+#index
+training_data = subset(diabetic_data, index==TRUE)
+testing_data = subset(diabetic_data, index==FALSE)
+dim(training_data)
+
+table(diabetic_data$Is_Diabetic_Flag)/nrow(diabetic_data)
+table(training_data$Is_Diabetic_Flag)/nrow(training_data)
+table(testing_data$Is_Diabetic_Flag)/nrow(testing_data)
+
+```
+
+# Logit : Model 
+```{r}
+logit_model = glm(Is_Diabetic_Flag~., data=training_data,family = "binomial")
+summary(logit_model)
+
+```
+
+## Logit : prediction using test data
+```{r}
+dim(testing_data)
+pred_test = predict(logit_model,testing_data,type="response")
+
+View(pred_test)
+
+# Confusion matrix when cutoff is 0.5 / Acc = 0.7656
+library(caret)
+pred_class = ifelse(pred_test>0.5,"YES","NO") 
+pred_class = as.factor(pred_class)
+confusionMatrix(pred_class,testing_data$Is_Diabetic_Flag)
+
+# Confusion matrix when cutoff is 0.3  / Acc =  0.7344
+pred_class = ifelse(pred_test>0.3,"YES","NO")
+pred_class = as.factor(pred_class)
+confusionMatrix(pred_class,testing_data$Is_Diabetic)
+
+# Confusion matrix when cutoff is 0.7 / Acc =  0.7383
+pred_class = ifelse(pred_test>0.7,"YES","NO")
+pred_class = as.factor(pred_class)
+confusionMatrix(pred_class,testing_data$Is_Diabetic)
+
+```
+
+
+## Use ROC curve to find out better cut-off
+ROC is Receiver Operating Characteristic : summarizes model performance by evaluating the trade off between TPR(Sensitivity) and FPR(1-specificity)
+```{r}
+library(ROCR)
+ROC_pred = prediction(pred_test,testing_data$Is_Diabetic)
+ROC_perf = performance(ROC_pred,"tpr","fpr")
+
+plot(ROC_perf,col="blue",print.cutoffs.at=seq(0.1,by=0.1),text.adj=c(-0.2,1.7),cex=0.7)
+
+```
+
+```{r}
+# Confusion matrix when cutoff is 0.4
+pred_class = ifelse(pred_test>0.4,"YES","NO")
+pred_class = as.factor(pred_class)
+confusionMatrix(pred_class,testing_data$Is_Diabetic)
+
+```
+
+
+

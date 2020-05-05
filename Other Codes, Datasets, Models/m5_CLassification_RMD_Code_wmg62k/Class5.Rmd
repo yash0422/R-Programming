@@ -1,0 +1,133 @@
+---
+title: 'Class 5 : Classification : Decision Tree, Random Forest, Naive Bais, SVM'
+author: "Nile"
+date: "November 12, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read dataset
+```{r}
+rm(list=ls())
+#install.packages("memisc")
+library(memisc)
+
+setwd("E:/Eudreka/005-Classifications")
+diabetic_data = read.csv("Diabetes.csv",header=TRUE,stringsAsFactors = FALSE)
+str(diabetic_data)
+diabetic_data$Is_Diabetic = factor(diabetic_data$Is_Diabetic)
+str(diabetic_data)
+```
+
+##  Training and Test Dataset
+
+```{r}
+library(caTools)
+set.seed(1234)
+index = sample.split(diabetic_data, SplitRatio = 0.7)
+#index
+training_data = subset(diabetic_data, index==TRUE)
+testing_data = subset(diabetic_data, index==FALSE)
+dim(training_data)
+dim(testing_data)
+
+table(training_data$Is_Diabetic)
+table(testing_data$Is_Diabetic)
+
+```
+
+
+## Model generation : Decision Trees
+```{r}
+library(rpart)
+library(rpart.plot)
+
+decisionTree_Model = rpart(Is_Diabetic~.,training_data,method="class")
+decisionTree_Model
+
+rpart.plot(decisionTree_Model,cex = .7,extra=101,nn=TRUE,nn.cex=.6)
+
+path.rpart(decisionTree_Model,c(15,29,57,47,93,45,185,45,43))
+
+# plot(decisionTree_Model)
+# text(decisionTree_Model)
+
+```
+
+```{r}
+decisionTree_Model$cptable
+pruned_tree = prune(decisionTree_Model,"0.02472528","CP")
+rpart.plot(pruned_tree,cex = .7,extra=101,nn=TRUE,nn.cex=.6)
+```
+
+# Model Evaluation
+```{r}
+
+pred_test_dt = predict(decisionTree_Model,testing_data,type = "class")
+head(pred_test_dt)
+library(caret)
+confusionMatrix(table(pred_test_dt,testing_data$Is_Diabetic))
+
+```
+
+####################################################################
+## Random Forest
+## Model Creation
+```{r}
+library(randomForest)
+randomForest_Model = randomForest(Is_Diabetic~.,training_data, ntree=501)
+
+randomForest_Model
+
+```
+
+# Model Evaluation : on test data
+```{r}
+pred_test_rf = predict(randomForest_Model,testing_data,type = "class")
+head(pred_test_rf)
+confusionMatrix(table(pred_test_rf,testing_data$Is_Diabetic))
+
+```
+
+##############################################################
+# Naive Bias 
+
+```{r}
+library(e1071)
+naiveBias_Model = naiveBayes(Is_Diabetic~.,training_data)
+naiveBias_Model
+
+```
+
+# Model Evaluation
+
+```{r}
+str(testing_data)
+#my_ppt_ques = testing_data[1,]
+
+pred_test_nb = predict(naiveBias_Model,testing_data,type = "class")
+head(pred_test_nb)
+confusionMatrix(table(pred_test_nb,testing_data$Is_Diabetic))
+```
+
+##############################################################
+# Support Vector Machine
+
+
+```{r}
+library(e1071)
+svm_Model = svm(Is_Diabetic~.,data=training_data,kernel="linear",cost=0.1,scale=F)
+summary(svm_Model)
+#plot(svm_Model,training_data)
+
+```
+
+## Model Evaluation
+```{r}
+pred_test_svm = predict(svm_Model,testing_data,type = "class")
+confusionMatrix(table(pred_test_svm,testing_data$Is_Diabetic))
+```
+
