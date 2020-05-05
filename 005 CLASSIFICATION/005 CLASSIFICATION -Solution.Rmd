@@ -1,0 +1,409 @@
+---
+title: "005 CLASSIFICATION - ASSIGNMENT"
+author: "Vishal Desai"
+date: "4/13/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Module 5: Assignment
+
+Analyze the information given in the Affairs dataset and create classifiers using it.
+
+The dataset can be loaded into R using the library:
+
+➢ library(AER)
+
+# IMPORT Library and required Dataser from the Library
+
+```{r Import Library, warning=FALSE}
+
+library(AER)
+library(help=AER)
+data("Affairs")
+affairs = Affairs
+summary(affairs)
+str(affairs)
+print(ncol(affairs))
+print(nrow(affairs))
+
+```
+
+The description of the attributes in the dataset are as follows:
+
+• affairs        –  Numeric Variable   -   How often engaged in extramarital sexual intercourse during the past year.
+
+• gender         –  Factor             -   Indicating Gender.
+
+• age            –  Numeric Variable   -   Coding age in years
+
+• yearsmarried   –  Numeric Variable   -   Coding number of years married...
+                                           0.125 =  3 months or less,
+                                           0.417 =  4–6 months,
+                                           0.75  =  6 months – 1 year,
+                                           1.5   =  1–2 years,
+                                           4     =  3–5 years,
+                                           7     =  6–8 years,
+                                           10    =  9–11 years,
+                                           15    =  12 or more years.
+
+• religiousness  –  Numeric Variable   -   Coding Religiousness:
+                                           1  =  anti,
+                                           2  =  not at all,
+                                           3  =  slightly,
+                                           4  =  somewhat,
+                                           5  =  very.
+
+• Education      -  Numeric Variable   -   coding level of education:
+                                           9   =  Grade School,
+                                           12  =  High School Graduate,
+                                           14  =  Some College,
+                                           16  =  College Graduate,
+                                           17  =  Some Graduate Work,
+                                           18  =  Master's Degree,
+                                           20  =  Ph.D., M.D., or other advanced degree.
+
+```{r}
+hist(affairs$affairs)
+```
+
+Above Histrogram shows that number of Affairs individual having but most of the individual range from 0 -1 Affair
+
+BRIEF INSIGHT:
+
+From below extraction we can get little insight about the data, which are as follow...
+
+There are 451 individuals who being in affair didn't had any physical relationship.
+```{r}
+
+affairs_aggregate = aggregate(x = affairs, by = list(unique.values = affairs$affairs), FUN=length)
+affairs_aggregate
+
+```
+
+Female were highly involved in Physical relationship as compare of males, with figure showing 315 FEMALES and 286 MALES
+
+```{r}
+gender_aggregate = aggregate(x = affairs, by = list(unique.values = affairs$gender), FUN=length)
+gender_aggregate
+```
+
+Three Age group had been involved highly in Physical Relationship which falls near the age of marriage, that being 22, 27 32.
+
+And Three Age group who were less likely involved are 17.5, 52 & 57.
+
+```{r}
+aggregate(x = affairs, by = list(unique.values = affairs$age), FUN=length)
+```
+
+```{r}
+
+aggregate(x = affairs, by = list(unique.values = affairs$yearsmarried), FUN=length)
+
+```
+
+• yearsmarried   –  Numeric Variable   -   Coding number of years married...
+                                           0.125 =  3 months or less,
+                                           0.417 =  4–6 months,
+                                           0.75  =  6 months – 1 year,
+                                           1.5   =  1–2 years,
+                                           4     =  3–5 years,
+                                           7     =  6–8 years,
+                                           10    =  9–11 years,
+                                           15    =  12 or more years.
+
+Individual who were married and were highly involved in Physical Relationship were in range of 1. 12 years and more in a marriage, 3-5 years individuals and 1-2 years. 
+
+```{r}
+
+aggregate(x = affairs, by = list(unique.values = affairs$children), FUN=length)
+
+```
+
+Individuals with Children were highly involed in Physical Relationship that is 430.
+
+```{r}
+
+aggregate(x = affairs, by = list(unique.values = affairs$religiousness), FUN=length)
+
+```
+
+• religiousness  –  Numeric Variable   -   Coding Religiousness:
+                                           1  =  anti,
+                                           2  =  not at all,
+                                           3  =  slightly,
+                                           4  =  somewhat,
+                                           5  =  very.
+
+People who where somewhat religious were involved highly in Physical Relationship, range being Somewhat - 190, Not at all - 164 and Slightly - 129.
+
+```{r}
+
+aggregate(x = affairs, by = list(unique.values = affairs$education), FUN=length)
+
+```
+
+• Education      -  Numeric Variable   -   coding level of education:
+                                           9   =  Grade School,
+                                           12  =  High School Graduate,
+                                           14  =  Some College,
+                                           16  =  College Graduate,
+                                           17  =  Some Graduate Work,
+                                           18  =  Master's Degree,
+                                           20  =  Ph.D., M.D., or other advanced degree.
+
+Individuals who's education level was just till High School were less likely involved in Physical Relationship as compare to who did completed Graduation and Master's Degree, figure being...
+
+Some COllege - 154, College Graduates - 115 and Master's - 112 and on the least side were individuals who studided only till Grade School - 7 and individuals who had High School were also less likely involved number being to 44.
+
+
+```{r}
+
+aggregate(x = affairs, by = list(unique.values = affairs$occupation), FUN=length)
+
+```
+
+Look for NA Values in our Dataset...
+
+```{r}
+colSums(is.na(affairs))
+```
+
+Task 1: Using the affairs column of our data
+
+   Create a new column with nominal values “YES” and “NO”.
+  
+   Convert it into factor
+
+
+
+```{r}
+# Create a copy of our Dataset
+aff_new = affairs
+
+# Have a look at new Dataset
+str(aff_new)
+
+```
+
+```{r}
+
+# Create a New Column
+aff_new$aff_yes_no = aff_new$affairs
+
+# Replace the 0 with No and all other numbers to Yes...
+aff_new$aff_yes_no = sub("0", "No", aff_new$aff_yes_no)
+aff_new$aff_yes_no = sub("12", "Yes", aff_new$aff_yes_no)
+aff_new$aff_yes_no = sub("1", "Yes", aff_new$aff_yes_no)
+aff_new$aff_yes_no = sub("2", "Yes", aff_new$aff_yes_no)
+aff_new$aff_yes_no = sub("3", "Yes", aff_new$aff_yes_no)
+aff_new$aff_yes_no = sub("7", "Yes", aff_new$aff_yes_no)
+view(aff_new$aff_yes_no)
+
+```
+
+```{r}
+
+# Check Class of new created columns after replacing the number to Yes and No
+str(aff_new)
+class(aff_new$aff_yes_no)
+
+# Change the Class of new columns to Factor
+aff_new$aff_yes_no = as.factor(as.factor(aff_new$aff_yes_no))
+view(aff_new$aff_yes_no)
+
+```
+
+```{r Export CSV File}
+
+# Save our New file for usage and avoid any mishap
+write.csv(aff_new, "Edited_Affairs_DataSet.csv")
+
+```
+
+Task 2: Create a classifier with our data using Decision Tree Algorithm
+
+   Plot the Decision tree
+  
+   Calculate the accuracy using confusion matrix
+
+
+#####################
+  DECISION TREE
+#####################
+```{r DECISION TREE}
+
+#Import Dataset
+affairs_new = read.csv("Edited_Affairs_DataSet.csv")
+str(affairs_new)
+summary(affairs_new)
+affairs_new = affairs_new[, -1]
+View(affairs_new)
+affairs_new$affairs = affairs_new$aff_yes_no
+View(affairs_new)
+affairs_new = affairs_new[, -10]
+View(affairs_new)
+
+
+#Install Library
+install.packages("rpart")
+library(rpart)
+
+#Build a training and testing set
+set.seed(4)
+id = sample(2, nrow(affairs_new), prob = c(0.7,0.3),replace = T)
+trainset = affairs_new[id==1,]
+testset = affairs_new[id==2,]
+class(trainset)
+
+View(trainset)
+View(testset)
+
+# Build decision tree model
+d_tree_model = rpart(trainset$affairs~. ,data = trainset)
+summary(d_tree_model)
+
+### Depth of our DECISION TREE is     =  419
+### Important Variable being          =  RATING
+### Least Important Variable being    =  RELIGIOUSNES
+
+
+plot(d_tree_model, margin=0.1)
+text(d_tree_model, use.n = TRUE, pretty = TRUE, cex=0.8)
+
+#temp = trainset[trainset$glucose_conc<154.5 & trainset$BMI<26.35,]
+#table(temp$Is_Diabetic)
+
+predvalues_new = predict(d_tree_model, newdata = testset, type = "class")
+predvalues_new
+
+View(predvalues_new)
+View(affairs_new$affairs)
+str((predvalues_new))
+str(affairs_new$affairs)
+
+install.packages("caret")
+library(caret)
+
+install.packages("e1071")
+library(e1071)
+confusionMatrix(table(predvalues_new, testset$affairs))
+
+```
+
+
+#####################
+  
+  RANDOM FOREST
+  
+#####################
+
+```{r IMPORT DATASER - RANDOM FOREST}
+
+getwd()
+df_affairs = read.csv("Edited_Affairs_DataSet.csv")
+str(df_affairs)
+df_affairs = df_affairs[, -1]
+df_affairs$affairs = df_affairs$aff_yes_no
+df_affairs = df_affairs[, -10]
+
+```
+
+```{r Import Library}
+install.packages("randomForest")
+library(randomForest)
+
+```
+
+```{r TRAIN-TEST SPLIT}
+
+#Build a training and testing set
+set.seed(4)
+id = sample(2,nrow(df_affairs), prob = c(0.7,0.3), replace = T)
+trainset = df_affairs[id == 1,]
+testset = df_affairs[id==2,]
+class(trainset)
+
+#Build random forest model
+rd_frst_model = randomForest(trainset$affairs ~ ., data = trainset, ntree=200)
+rd_frst_model
+plot(rd_frst_model)
+
+####
+# No. of variables tried at each split: 2
+# OOB estimate of  error rate: 26.97%
+
+
+```
+
+```{r}
+
+library(data.table)
+library(ggplot2)
+
+# Get OOB data from plot and coerce to data.table
+oobData = as.data.table(plot(rd_frst_model))
+
+# Define trees as 1 : ntree
+oobData[, trees := .I]
+
+# Cast to long format
+oobData2 = melt(oobData, id.vars = "trees")
+setnames(oobData2, "value", "error")
+
+# Plot using ggplot
+ggplot(data = oobData2, aes(x = trees, y = error, color = variable)) + geom_line()
+
+predvalues<-predict(rd_frst_model, newdata = testset, type = "class")
+predvalues
+
+```
+
+# CONFUSION MATRIX
+
+```{r}
+
+install.packages("caret")
+library(caret)
+
+install.packages("e1071")
+library(e1071)
+confusionMatrix(table(predvalues, testset$affairs))
+
+# Confusion Matrix and Statistics = 78.57
+
+```
+
+```{r}
+
+hist(treesize(rd_frst_model))
+
+varImp(rd_frst_model)
+varImpPlot(rd_frst_model, sort = TRUE, type = 2)
+importance(rd_frst_model)
+varUsed(rd_frst_model)
+
+```
+
+```{r}
+
+# Using For loop to identify the right mtry for model
+a = c()
+i = 5
+for (i in 3:8) {
+  model3 <- randomForest(trainset$affairs ~ . , data = trainset, ntree = 500, mtry = i, importance = TRUE)
+  predValid <- predict(model3, testset, type = "class")
+  a[i-2] = mean(predValid == testset$affairs)
+}
+
+a
+
+plot(3:8,a)
+
+
+```
