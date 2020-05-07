@@ -1,0 +1,157 @@
+---
+title: "Journal 2 - K-Means CLustering"
+author: "Vishal Desai"
+date: "4/21/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+K-MEANS CLUSTERING ANALYSIS
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+Clustering is a broad set of techniques for finding subgroups of observations within a data set.
+
+When we cluster observations, we want observations in the same group to be similar and observations in different groups to be dissimilar.
+
+Because there isn’t a response variable, this is an unsupervised method, which implies that it seeks to find relationships between the 'n' observations without being trained by a response variable.
+
+Clustering allows us to identify which observations are alike, and potentially categorize them therein. K-means clustering is the simplest and the most commonly used clustering method for splitting a dataset into a set of k groups.
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+REQUIRED LIBRARIES:
+
+library(xlsx)       # Reading Excel File
+library(tidyverse)  # Data Manipulation
+library(cluster)    # Clustering Algorithms
+library(factoextra) # Clustering Algorithms & Visualization
+library(animation)
+
+```{r cars}
+install.packages(contrib.url)
+library(tidyverse)  # Data Manipulation
+library(cluster)    # Clustering Algorithms
+library(factoextra) # Clustering Algorithms & Visualization
+library(animation)
+install.packages("openxlsx")
+library(openxlsx)
+
+```
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Data Preparation
+
+To perform a cluster analysis in R, generally, the data should be prepared as follows:
+
+1. Rows are observations (individuals) and columns are variables
+2. Any missing value in the data must be removed or estimated.
+3. The data must be standardized (i.e., scaled) to make variables comparable.
+   Recall that, standardization consists of transforming the variables such that
+  they have mean zero and standard deviation one.1
+
+```{r }
+
+# IMPORT DATASET
+InsuranceData <- openXL("InsuranceData.xlsx",sheet = 1, head(TRUE))
+View(InsuranceData)
+
+# To remove any missing value that might be present in the data, type this:
+InsuranceData <- na.omit(InsuranceData)
+
+# SCALE DATA
+# As we don’t want the clustering algorithm to depend to an arbitrary variable unit,
+# we start by scaling/standardizing the data using the R function scale:
+
+Insur_data = scale(InsuranceData)
+View(Insur_data)
+
+distance = get_dist(Insur_data)
+
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+
+```
+
+
+Clustering Distance Measures:
+
+The classification of observations into groups requires some methods for computing the distance or the (dis)similarity between each pair of observations. The result of this computation is known as a dissimilarity or distance matrix. There are many methods to calculate this distance information; the choice of distance measures is a critical step in clustering. It defines how the similarity of two elements (x, y) is calculated and it will influence the shape of the clusters.
+
+The choice of distance measures is a critical step in clustering. It defines how the similarity of two elements (x, y) is calculated and it will influence the shape of the clusters. The classical methods for distance measures are Euclidean and Manhattan distances, which are defined as follow:
+
+1. Euclidean distance
+2. Manhattan distance
+3. Pearson correlation distance
+4. Spearman correlation distance
+5. Kendall correlation distance
+
+The choice of distance measures is very important, as it has a strong influence on the clustering results. For most common clustering software, the default distance measure is the Euclidean distance. However, depending on the type of the data and the research questions, other dissimilarity measures might be preferred and you should be aware of the options.
+
+Within R it is simple to compute and visualize the distance matrix using the functions get_dist and fviz_dist from the factoextra R package. This starts to illustrate which states have large dissimilarities (red) versus those that appear to be fairly similar (teal).
+
+<< get_dist  >> for computing a distance matrix between the rows of a data matrix. The default distance computed is the Euclidean; however, get_dist also supports distanced described in equations 2-5 above plus others.
+
+<<  fviz_dist  >> for visualizing a distance matrix
+
+
+```{r DISTANCE CALCULATION}
+
+distance = get_dist(Insur_data)
+
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+
+```
+
+
+K-means Algorithm
+
+The first step when using k-means clustering is to indicate the number of clusters (k) that will be generated in the final solution. The algorithm starts by randomly selecting k objects from the data set to serve as the initial centers for the clusters. The selected objects are also known as cluster means or centroids. Next, each of the remaining objects is assigned to it’s closest centroid, where closest is defined using the Euclidean distance (Eq. 1) between the object and the cluster mean. This step is called “cluster assignment step”. After the assignment step, the algorithm computes the new mean value of each cluster. The term cluster “centroid update” is used to design this step. Now that the centers have been recalculated, every observation is checked again to see if it might be closer to a different cluster. All the objects are reassigned again using the updated cluster means. The cluster assignment and centroid update steps are iteratively repeated until the cluster assignments stop changing (i.e until convergence is achieved). That is, the clusters formed in the current iteration are the same as those obtained in the previous iteration.
+
+K-means algorithm can be summarized as follows:
+
+Specify the number of clusters (K) to be created (by the analyst)
+Select randomly k objects from the data set as the initial cluster centers or means
+Assigns each observation to their closest centroid, based on the Euclidean distance between the object and the centroid
+For each of the k clusters update the cluster centroid by calculating the new mean values of all the data points in the cluster. The centroid of a Kth cluster is a vector of length p containing the means of all variables for the observations in the kth cluster; p is the number of variables.
+Iteratively minimize the total within sum of square (Eq. 7). That is, iterate steps 3 and 4 until the cluster assignments stop changing or the maximum number of iterations is reached. By default, the R software uses 10 as the default value for the maximum number of iterations.
+Computing k-means clustering in R
+We can compute k-means in R with the kmeans function. Here will group the data into two clusters (centers = 2). The kmeans function also has an nstart option that attempts multiple initial configurations and reports on the best one. For example, adding nstart = 25 will generate 25 initial configurations. This approach is often recommended.
+
+```{r }
+
+kmen = kmeans(Insur_data,4, nstart = 24)
+str(kmen)
+kmen
+kmen$cluster
+kmen$withinss
+kmen$tot.withinss
+```
+
+The output of kmeans is a list with several bits of information. The most important being:
+
+cluster: A vector of integers (from 1:k) indicating the cluster to which each point is allocated.
+centers: A matrix of cluster centers.
+totss: The total sum of squares.
+withinss: Vector of within-cluster sum of squares, one component per cluster.
+tot.withinss: Total within-cluster sum of squares, i.e. sum(withinss).
+betweenss: The between-cluster sum of squares, i.e. $totss-tot.withinss$.
+size: The number of points in each cluster.
+
+
+We can also view our results by using fviz_cluster. This provides a nice illustration of the clusters. If there are more than two dimensions (variables) fviz_cluster will perform principal component analysis (PCA) and plot the data points according to the first two principal components that explain the majority of the variance.
+
+```{r}
+
+fviz_cluster(kmen, data = Insur_data)
+
+```
+

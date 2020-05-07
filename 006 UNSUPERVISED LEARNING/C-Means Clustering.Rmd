@@ -1,0 +1,48 @@
+---
+title: "C-Means Clustering"
+author: "Vishal Desai"
+date: "4/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r }
+install.packages("openxlsx")
+library(openxlsx)
+
+# IMPORT DATASET
+InsuranceData <- openXL("InsuranceData.xlsx",sheet = 1, head(TRUE))
+View(InsuranceData)
+
+# To remove any missing value that might be present in the data, type this:
+InsuranceData <- na.omit(InsuranceData)
+
+# SCALE DATA
+# As we don’t want the clustering algorithm to depend to an arbitrary variable unit,
+# we start by scaling/standardizing the data using the R function scale:
+
+Insur_data = scale(InsuranceData)
+View(Insur_data)
+```
+
+
+```{r }
+View(Insur_data)
+library(e1071)
+c_mean = cmeans(Insur_data, 5)
+options(scipen=10)
+View(Insur_data)
+str(c_mean)
+c_mean$cluster
+c_mean$withinss
+c_mean$tot.withinss
+c_mean$centers
+View(c_mean)
+format(Insur_data, scientific=FALSE)
+plot(Insur_data, col=c_mean$cluster, color=TRUE, las=1, xlab="gross", ylab="budget")
+points(c_mean$centers, col=1:4, pch=1, cex=20)
+#plotcluster(c_mean, cp=1, trans=TRUE)
+```
