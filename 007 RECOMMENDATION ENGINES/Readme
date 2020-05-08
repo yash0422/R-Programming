@@ -1,1 +1,15 @@
 007 RECOMMENDATION ENGINES
+
+
+Perform the following activities in R
+
+Task 1: Association Rule mining
+ Load Adult data into R (Adult data is a built-in dataset in the arules package of R).
+ Plot a graph of ten items with highest support.
+ Generate association rules with lhs values as "capital-loss=None" and "native-country=United-States"
+ Use arulesViz package to generate some visualizations from patterns
+
+Task 2: Recommendation Engine
+ Load the movie.csv file into R and convert the file into realRatingMatrix
+ Explore the data and plot a histogram of normalized ratings
+ Build a User bases collaborative filter which recommends 5 items to user100 and user101
