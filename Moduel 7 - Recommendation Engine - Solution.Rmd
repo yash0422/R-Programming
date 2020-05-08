@@ -1,0 +1,114 @@
+---
+title: "Module 7 - Recommendation Engines"
+author: "Vishal Desai"
+date: "4/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Module 7: RECOMMENDATION ENGINE
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Perform the following activities in R
+
+Task 2: Recommendation Engine
+   Load the movie.csv file into R and convert the file into realRatingMatrix
+   Explore the data and plot a histogram of normalized ratings
+   Build a User bases collaborative filter which recommends 5 items to user100 and user101
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+INSTALL LIBRARIES
+
+```{r INSTALL LIBRARIES}
+
+install.packages("recommenderlab")
+library(recommenderlab)
+
+```
+
+
+DATA EXPLORATION
+
+```{r IMPORT DATA & EXPLORATION}
+
+getwd()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+movi = read.transactions("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/007 RECOMMENDATION ENGINES/Class Files/movie.csv")
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+summary(movi)
+View(movi)
+class(movi)
+str(movi)
+names(movi)
+nrow(movi)
+ncol(movi)
+#colSums(is.na(movi))
+#nratings(movi)
+dimnames(movi)
+
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+#  Load the movie.csv file into R and convert the file into realRatingMatrix
+
+obj_size = object.size(movi)
+obj_mtrx_size = object.size(as(movi,"matrix"))
+ratio = obj_size/obj_mtrx_size
+ratio
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+hist(getRatings(movi), breaks = 100)
+hist(getRatings(normalize(movi)),breaks = 100)
+
+```
+
+
+```{r APPLY RECOMMENDATION ENGINE}
+
+set.seed(3)
+rec_engine = sample(x = c(TRUE, FALSE), nrow(movi), prob = c(0.8,0.2), replace=T)
+train_movi = movi[rec_engine,]
+test_movi = movi[!rec_engine,]
+
+# - - - - - - - - - - - - - - - - -
+
+rec_mdl_ubcf = Recommender(train_movi, method = "UBCF")
+rec_mdl_ubcf
+
+
+
+
+
+```
+
+```{r }
+
+
+
+```
+
+
+
+```{r }
+
+
+
+```
+
+```{r }
+
+
+```
+

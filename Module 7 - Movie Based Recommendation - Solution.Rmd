@@ -1,0 +1,149 @@
+---
+title: "Text Mining 001"
+author: "Vishal Desai"
+date: "4/24/2020"
+output: html_document
+---
+#24
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r SET WORKING DIRECTORY}
+
+getwd()
+setwd("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/007 RECOMMENDATION ENGINES")
+
+```
+
+
+```{r IMPORT LIBRARY}
+
+library(reshape2)
+library(recommenderlab)
+
+```
+
+```{r IMPORT DATASET}
+
+mu_vs = read.csv("movies.csv", stringsAsFactors = FALSE)
+ra_tng = read.csv("ratings.csv")
+View(mu_vs)
+View(ra_tng)
+table(ra_tng$userId)
+
+```
+
+```{r CREATE RATINGS MATRIX}
+
+#Create ratings matrix. Rows = userId, Columns = movieId
+ra_tng_mtrx = dcast(ra_tng, userId ~ movieId, value.var = "rating", na.rm=FALSE)
+ra_tng_mtrx = as.matrix(ra_tng_mtrx[,-1]) #remove userIds
+
+```
+
+```{r CONVERT TO REAL RATING MATRIX}
+
+#Convert rating matrix into a recommenderlab sparse matrix
+ra_tng_mtrx = as(ra_tng_mtrx, "realRatingMatrix")
+
+```
+
+```{r EXPLORING VALUES OF RATINGS}
+
+vector_ratings = as.vector(ra_tng_mtrx@data)
+unique(vector_ratings)                                # what are unique values of ratings
+
+table_ratings = table(vector_ratings) # what is the count of each rating value
+table_ratings
+
+```
+
+```{r PLOT HISTOGRAM}
+
+vector_ratings = vector_ratings[vector_ratings != 0] # rating == 0 are NA values
+vector_ratings = factor(vector_ratings)
+
+qplot(vector_ratings) + ggtitle("Distribution of the ratings")
+
+```
+
+```{r EXPLORE VIEWING OF MOVIES}
+
+# Exploring viewings of movies:
+
+views_per_movie = colCounts(ra_tng_mtrx)                                              # count views for each movie
+
+table_views = data.frame(movie = names(views_per_movie), views = views_per_movie)     # create dataframe of views
+table_views = table_views[order(table_views$views, decreasing = TRUE), ]              # sort by number of views
+table_views = as.data.frame(table_views)
+View(table_views)
+
+movies2 = mu_vs[-which((mu_vs$movieId %in% ra_tng$movieId) == FALSE),]
+rownames(movies2) = NULL
+
+movies3 = merge(table_views, movies2, by.x = "movie", by.y = "movieId")
+
+movies3 = movies3[order(-movies3$views),]
+
+
+```
+
+```{r UBCF METHOD}
+
+# Method: UBCF
+# Similarity Calculation Method: Cosine Similarity
+# Determine how similar the first four users are with each other
+# Create similarity matrix
+similarity_users = similarity(ra_tng_mtrx[1:4, ], method = "cosine", which = "users")
+as.matrix(similarity_users)
+
+# compute similarity between
+# the first four movies
+similarity_items <- similarity(ra_tng_mtrx[, 1:4], method = "cosine", which = "items")
+as.matrix(similarity_items)
+
+```
+
+```{r CREATE UBCF RECOMMENDER MODEL}
+
+##  USER 100  ##
+
+# Create UBFC Recommender Model. UBCF stands for User-Based Collaborative Filtering
+recommender_model = Recommender(ra_tng_mtrx, method = "UBCF", param=list(method="Cosine"))
+
+model_details = getModel(recommender_model)
+model_details$data
+
+recom = predict(recommender_model, ra_tng_mtrx[100], n = 5) # Obtain top 5 recommendations for 1st user in dataset
+recom
+recom_list = as(recom, "list")                             # convert recommenderlab object to readable list
+recom_list
+
+# Obtain Recommendations
+recom_result = matrix(0,5)
+for (i in 1:5){
+  recom_result[i] = as.character(subset(mu_vs,
+                                        mu_vs$movieId == as.integer(recom_list[[1]][i]))$title)
+}
+recom_result
+```
+
+```{r }
+
+##  USER 101  ##
+
+recom2 = predict(recommender_model, ra_tng_mtrx[101], n = 5) # Obtain top 5 recommendations for 2nd user in dataset
+recom2
+recom_list2 = as(recom2, "list")                             # convert recommenderlab object to readable list
+recom_list2
+
+# Obtain Recommendations
+recom_result2 = matrix(0,5)
+for (i in 1:5){
+  recom_result2[i] = as.character(subset(mu_vs,
+                                        mu_vs$movieId == as.integer(recom_list[[1]][i]))$title)
+}
+recom_result2
+```
+
