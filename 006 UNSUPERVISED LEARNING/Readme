@@ -1,1 +1,21 @@
 006 UNSUPERVISED LEARNING
+
+Analyze the information given in the following ‘Insurance Policy dataset’ to create
+clusters of persons falling in the same type.
+
+The description of the attributes in the dataset are as follows:
+• Premium Paid – Amount paid by the person
+• Age – Indicates the age of the person
+• Days to renew – Days remaining to renew the policy
+• Claims made – Indicates the claims already made by the person
+• Income – Net income of the person
+
+Perform the following tasks on the dataset
+Task 1: Import the dataset into R
+ Attach the library xlsx into R to load the data .
+
+Task 2: Perform K-means clustering on the data
+ Find the optimal number of clusters for our data
+ Plot age vs income while giving them cluster colors
+
+Task 3: Perform C-means clustering on the data and save the membership dataframe in csv format.
