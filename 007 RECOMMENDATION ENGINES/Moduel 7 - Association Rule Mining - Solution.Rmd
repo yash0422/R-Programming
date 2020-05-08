@@ -1,0 +1,156 @@
+---
+title: "Module 7 - Recommendation Engines"
+author: "Vishal Desai"
+date: "4/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Module 7: Assignment
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Perform the following activities in R
+
+Task 1: Association Rule mining
+  
+   Load Adult data into R (Adult data is a built-in dataset in the arules package of R).
+   Plot a graph of ten items with highest support.
+   Generate association rules with lhs values as "capital-loss=None" and   
+    "native-country=United-States"
+   Use arulesViz package to generate some visualizations from patterns
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+INSTALL LIBRARIES
+
+```{r INSTALL LIBRARIES}
+
+# Load Adult data into R (Adult data is a built-in dataset in the arules package of R).
+
+install.packages("arules")
+library(arules)
+library(help=arules)
+data("Adult")
+adlts = Adult
+
+```
+
+
+DATA EXPLORATION
+
+```{r DATA EXPLORATION}
+
+summary(adlts)
+View(adlts)
+class(adlts)
+str(adlts)
+names(adlts)
+nrow(adlts)
+ncol(adlts)
+colSums(is.na(adlts))
+
+```
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Given number of ROWS and COLUMNS of our Dataset and Density shown how much of the Sparse matrix is filled...  <<  48842 * 115 * 0.1089939 = 612200.2  >>
+# This are number of cell of our sparse matrix having values.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# This are the MOST FREQUENT ITEMS...
+
+# most frequent items:
+#           capital-loss=None            capital-gain=None native-country=United-States 
+#                       46560                        44807                        43832 
+#                  race=White            workclass=Private                      (Other) 
+#                       41762                        33906                       401333 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Gives the number of Transactions with given number of items.
+# Eg. There are 19 Transactions with 9 Items and 30162 Transactions with 13 Items.
+
+# element (itemset/transaction) length distribution:
+# sizes
+#    9    10    11    12    13 
+#   19   971  2067 15623 30162 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+```{r }
+
+# Inspect function is used to view the association rules
+inspect(adlts[1:3])
+
+# Item frequency helps in getting support characteristics
+itemFrequency(adlts[,1])
+itemFrequency(adlts[,1:100])
+
+# PLOT used to find out Support Values of all Items in Dataset
+itemFrequencyPlot(adlts, support=0.08)
+
+# - - - - - - - - - - - - - - - - -
+
+# TASK: Plot a graph of ten items with highest support.
+
+# PLOT used to find out Support Values of TOP 10 Items in Dataset
+itemFrequencyPlot(adlts, topN =10)
+
+# - - - - - - - - - - - - - - - - -
+
+```
+
+```{r }
+
+# Generating association rules
+
+m1 <- apriori(adlts)
+summary(m1)  # set of 6137 rules
+itemFrequencyPlot(adlts, support=0.08)
+
+m2 <- apriori(adlts, parameter = list(support=0.097, confidence = 0.97))
+summary(m2)
+itemFrequencyPlot(adlts, support=0.097)
+
+m3 <- apriori(adlts, parameter = list(support=0.099, confidence = 0.99))
+summary(m3)
+itemFrequencyPlot(adlts, support=0.099)
+
+inspect(m3[1:10])
+
+# Sort Rules where LIFT is HIGH
+inspect(sort(m3, by = "lift")[1:5])
+
+```
+
+
+```{r }
+
+# Generate association rules with lhs values as "capital-loss=None" and "native-country=United-States"
+
+m4 = apriori(adlts, parameter = list(support=0.085,confidence=0.085),
+             appearance = list(default="rhs", lhs = c("capital-loss=None","native-country=United-States")))
+summary(m4)
+inspect(m4[1:5])
+
+install.packages("arulesViz")
+library(arulesViz)
+plot(m4)
+
+
+```
+
+```{r }
+
+install.packages("arulesViz")
+library(arulesViz)
+plot(m4)
+
+```
+
