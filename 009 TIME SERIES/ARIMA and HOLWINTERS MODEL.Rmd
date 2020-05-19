@@ -1,0 +1,68 @@
+---
+title: "ARIMA and HOLTWINTERS Model"
+author: "Vishal Desai"
+date: "5/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r }
+
+ds = read.csv("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/009 TIME SERIES/monthly-milk-production-pounds-pp.csv")
+View(ds)
+
+```
+
+```{r }
+
+ds.ts = ts(ds$V2, start=c(1962,1), end=c(1974,12), frequency=12)
+plot(ds.ts)
+plot(decompose(ds.ts))
+
+```
+
+```{r }
+
+ds.train_set = ts(ds$V2, start=c(1962,1), end=c(1974,12), frequency=12)
+ds.test_set = ts(ds$V2, start=c(1975,1), end=c(1975,12), frequency=12)
+ds.train_set
+ds.test_set
+
+```
+
+```{r ARIMA MODEL}
+library(forecast)
+ds.arima = auto.arima(ds.ts)
+ds.prd_arima = forecast(ds.arima, h=12)
+plot(forecast(ds.arima, h=12), include=1)
+```
+
+```{r HOLT WINTERS MODEL}
+ds.HW = HoltWinters(ds.ts)
+ds.HW_pred = predict(ds.HW, n.ahead=12)
+ts.plot(ds.HW_pred)
+```
+
+```{r }
+
+par(mfrow=c(3,1))
+plot(forecast(ds.arima, h=12), include=1)
+ts.plot(ds.HW_pred)
+plot(ds.test_set)
+
+
+```
+
+
+```{r }
+
+par(mfrow=c(3,1))
+plot(forecast(ds.arima, h=12), include=1)
+ts.plot(ds.HW_pred)
+plot(ds.test_set)
+
+```

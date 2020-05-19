@@ -1,0 +1,151 @@
+---
+title: "Practise as per Class File"
+author: "Vishal Desai"
+date: "5/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#24
+# ARIMA MODEL APPLICATION
+
+# Start
+
+```{r IMPORT DATASET}
+
+library(forecast)
+library(tseries)
+library(timeSeries)
+
+```
+
+```{r IMPORT DATASET}
+
+milk_prod = read.csv("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/009 TIME SERIES/Milk_Prod_Edited.csv", header = TRUE)
+
+View(milk_prod)
+class(milk_prod)
+
+```
+
+```{r CONVERT TO TIME SERIES FORMAT}
+
+milk_prod_ts = ts(milk_prod)
+class(milk_prod_ts)
+plot(milk_prod_ts[,2])
+```
+
+```{r DATA SPLIT INTO TRAIN & TEST SET}
+
+milk_prod_train = milk_prod[1:156,]
+milk_prod_test = milk_prod[157:nrow(milk_prod),]
+
+```
+
+```{r DEFINE RMSE & MAPE FUNCTION}
+
+rmse = function(error){
+  sqrt(mean(error^2))
+}
+MAPE = function(error,milk_prod){
+  mean(abs(error/milk_prod))*100  
+}
+
+```
+
+```{r LINEAR TREND MODEL}
+
+linear_milkprod = lm(milk_prod~Month_series, milk_prod_train)
+linear_milkprod
+
+pre_validation = predict(linear_milkprod, newdata = milk_prod_test[,-2])
+error = milk_prod_test$milk_prod - pre_validation
+
+rmse(error)
+MAPE(error, milk_prod_test$milk_prod)
+
+plot(milk_prod$Month_series, milk_prod$milk_prod, type="l")
+
+par(new=TRUE)
+prepare_fuldata = predict(linear_milkprod, newdata = milk_prod[,-2])
+plot(milk_prod$Month_series, prepare_fuldata, type="l", col="green", yaxt="n",ylab="")
+plot(milk_prod_train$Month_series, residuals(linear_milkprod), type="l", col="black")
+
+```
+
+```{r LINEAR TREND WITH SEASONALITY}
+
+linear_w_seas = lm(milk_prod~Month_series + d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11, milk_prod_train)
+linear_w_seas
+
+pre_vldson_seas = predict(linear_w_seas, newdata = milk_prod_test[,-2])
+error = milk_prod_test$milk_prod - pre_vldson_seas
+rmse(error)
+MAPE(error, milk_prod_test$milk_prod)
+
+plot(milk_prod$Month_series, milk_prod$milk_prod,type="l")
+
+par(new=TRUE)
+prepr_fuldata_seas = predict(linear_w_seas, newdata = milk_prod[,-2])
+plot(milk_prod$Month_series, prepr_fuldata_seas, type="l", col="green", yaxt="n",ylab="")
+plot(milk_prod_train$Month_series, residuals(linear_w_seas), type="l", col="black")
+
+```
+
+```{r BINOMIAL TREND WITH SEASONALITY}
+
+binomal_w_seas = lm(milk_prod~Month_series + Month_.2 + d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11, milk_prod_train)
+binomal_w_seas
+
+pre_vldson_bio = predict(binomal_w_seas, newdata = milk_prod_test[,-2])
+error = milk_prod_test$milk_prod - pre_vldson_bio
+
+rmse(error)
+MAPE(error, milk_prod_test$milk_prod)
+
+plot(milk_prod$Month_series, milk_prod$milk_prod,type="l")
+
+par(new=TRUE)
+prepr_fuldata_bio = predict(binomal_w_seas, newdata = milk_prod[,-2])
+plot(milk_prod$Month_series, prepr_fuldata_bio, type="l", col="green", yaxt="n",ylab="")
+plot(milk_prod_train$Month_series, residuals(binomal_w_seas), type="l", col="black")
+
+```
+
+```{r ARIMA MODEL}
+
+install.packages("forecast")
+library(forecast)
+
+milkprod_filter = milk_prod_ts[1:156, c(2)]
+filtr_2_ts = ts(milkprod_filter, start=c(1962,1), frequency=12)
+filtr_2_ts
+class(filtr_2_ts)
+
+# Decompose the TRAIN Set MILK PRODUCTION Column
+filter_dcompos = decompose(filter_2_ts, "multiplicative")
+plot(filter_dcompos)
+
+y = auto.arima(filtr_2_ts)
+y
+plot(forecast(y, h=12))
+
+predic = forecast(y, h=12)
+predic
+pred_df = data.frame(predic)
+View(pred_df)
+
+pred_df$original = milk_prod_ts[157:168,2]
+pred_df$residual = pred_df$Point.Forecast - pred_df$original
+
+error = pred_df$Point.Forecast - pred_df$original
+
+rmse(error)
+MAPE(error, pred_df$original)
+
+
+```
+

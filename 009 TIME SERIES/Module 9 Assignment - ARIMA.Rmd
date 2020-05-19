@@ -1,0 +1,169 @@
+---
+title: "Module 9 Assignment - ARIMA"
+author: "Vishal Desai"
+date: "5/1/2020"
+output: html_document
+---
+#24
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ARIMA MODEL APPLICATION
+
+# Start
+
+```{r IMPORT DATASET}
+
+# Import Dataset
+# p_ds_M_P = Parent Dataset Milk Production
+
+p_ds_M_P = read.csv("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/009 TIME SERIES/Milk_Prod_Edited.csv", header = TRUE)
+p_ds_M_P
+class(p_ds_M_P)
+
+```
+
+```{r DATA CONVERTION TO TIME SERIES FORMAT & LINE PLOT}
+
+## Plot the data for analyzing Trend & Seasonality  ##
+# p_ds_M_P_ts = Parent Dataset Milk Production Time Series
+
+p_ds_M_P_ts = ts(p_ds_M_P)
+class(p_ds_M_P_ts)
+plot.ts(p_ds_M_P_ts[,2])
+
+```
+
+```{r RMSE & MAPE}
+
+### RMSE & MAPE Function ###
+
+rmse = function(error){
+  sqrt(mean(error^2))
+}
+
+MAPE = function(error,milk_prod){
+  mean(abs(error/milk_prod))*100  
+}
+
+```
+
+```{r ARIMA MODEL - Library Installation}
+
+# Import Library
+
+install.packages("forecast")
+library(forecast)
+
+```
+
+```{r DATA PARTITION}
+
+# Data Partition
+p_ds_M_P_ts_Filter = p_ds_M_P_ts[1:156,c(2)]
+tsdata_is = ts(p_ds_M_P_ts_Filter, start = c(1962,1), frequency = 12)
+tsdata_is
+
+class(tsdata_is)
+
+d_cmpos = decompose(tsdata_is, "multiplicative")
+plot(d_cmpos)
+
+cycle(tsdata_is)
+start(tsdata_is)
+end(tsdata_is)
+frequency(tsdata_is)
+
+
+```
+
+```{r APPLY ARIMA MODEL}
+
+# Applying ARIMA Model
+y_is = auto.arima(tsdata_is)
+y_is
+
+# Plotting
+plot(forecast(y_is, h = 12))
+pred_is = forecast(y_is, h = 12)
+pred_is
+
+```
+
+```{r CALCULATE RMSE & MAPE VALUES}
+
+# Convert Prediction into Dataframe
+pred_is_df = data.frame(pred_is)
+pred_is_df
+
+# Calculate RMSE & MAPE Values
+pred_is_df$original = p_ds_M_P_ts[157:168,2]
+pred_is_df$residual = pred_is_df$Point.Forecast - pred_is_df$original
+rmse(pred_is_df$residual)
+MAPE(error, pred_is_df$original)
+
+```
+
+# End - ARIMA MODEL
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+# HOLT WINTERS MODEL APPLICATION
+
+# Start
+```{r HW - IMPORT LIBRARY}
+
+library(smooth)
+library(zoo)
+
+```
+
+```{r HW - IMPORT DATASET}
+
+milk = read.csv("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/009 TIME SERIES/Milk_Prod_Holt_Edited.csv", header = TRUE)
+
+```
+
+```{r HW - CONVERT DATA TO TIME SERIES FORMAT}
+
+milk_ts = ts(milk)
+milk_ts = milk_ts[1:168]
+milk_ts = ts(milk_ts, start=c(1962,1), frequency = 12)
+class(milk_ts)
+milk_ts
+
+```
+
+```{r HW - DATA PARTITION}
+
+milk_training = milk_ts[1:156]
+milk_validation = milk_ts[157:168]
+
+```
+
+```{r HW - APPLY HOLT WINTERS METHOD}
+
+milk_training.ts = ts(milk_training, start=c(1962,1), frequency = 12)
+fit_holt_winter = hw(y = milk_training.ts, h=12)
+summary(fit_holt_winter)
+plot(forecast(fit_holt_winter))
+
+# ERROR
+values_mean = fit_holt_winter$mean
+error_holt_winter = milk_validation - values_mean
+
+# RMSE
+rmse(error_holt_winter)
+
+#MAPE
+MAPE(error_holt_winter, milk_validation)
+
+cbind(milk_validation, values_mean, error_holt_winter)
+
+# ACF
+acf(fit_holt_winter$residuals)
+
+```
+
+# End HOLT WINTERS METHOD

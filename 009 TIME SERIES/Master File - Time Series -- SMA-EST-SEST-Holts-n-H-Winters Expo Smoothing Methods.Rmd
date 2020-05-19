@@ -1,0 +1,183 @@
+---
+title: "Holt Winter Model and Smoothing Techniques"
+author: "Vishal Desai"
+date: "5/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# HOLT WINTERS MODEL APPLICATION
+
+```{r HW - IMPORT DATASET}
+
+milk_hw = scan("C:/Users/Asus/Desktop/Data Science Master Program/Edureka_Studies/R Certification/009 TIME SERIES/prod_milk_txt.txt")
+View(milk_hw)
+class(milk_hw)
+```
+
+```{r HW - CONVERT DATA TO TIME SERIES FORMAT}
+
+milk_hw_ts = ts(milk_hw)
+milk_hw_ts = milk_hw_ts[1:168]
+milk_hw_ts = ts(milk_hw_ts, start=c(1962,1), frequency = 12)
+class(milk_hw_ts)
+View(milk_hw_ts)
+
+```
+
+```{r HW - DATA PARTITION}
+
+milk_ts_train = milk_hw_ts[1:156]
+milk_ts_validation = milk_hw_ts[157:168]
+
+```
+
+```{r SMA = DEFINE RMSE & MAPE FUNCTION}
+
+rmse = function(error_sma){
+  sqrt(mean(error_sma^2))
+}
+MAPE = function(error_sma,V1){
+  mean(abs(error_sma/V1))*100  
+}
+
+```
+
+```{r APPLY SIMPLE MOVING AVERAGE}
+
+mving_ave = sma(milk_ts_train, h=12)   # SIMPLE MOVING AVERAGE
+summary(mving_ave)
+mving_ave$forecast   # Forecasted Value
+
+error_sma = milk_ts_validation - mving_ave$forecast
+rmse(error_sma)
+MAPE(error_sma, milk_ts_validation)
+cbind(milk_ts_validation, mving_ave$forecast, error_sma)
+
+```
+
+
+```{r EXPONENTIAL SMOOTHING MODELS}
+
+plot(milk_hw_ts)
+par(mfrow=c(1,1))
+plot(decompose(milk_hw_ts))
+
+# As seen from the Decomposition Plot there is Seasonality & Trend present in our data so MOVING AVERAGE may not be best
+# Suited
+```
+
+```{r SES = DEFINE RMSE & MAPE FUNCTION}
+
+rmse = function(error_ses){
+  sqrt(mean(error_ses^2))
+}
+MAPE = function(error_ses,V1){
+  mean(abs(error_ses/V1))*100  
+}
+
+```
+
+```{r SIMPLE EXPONENTIAL SMOOTHING}
+
+# Use SES or ETS  methods for exponential smoothing
+library(forecast)
+fit_SES = ses(milk_ts_train, h=12)
+summary(fit_SES)
+plot(forecast(fit_SES))
+plot(fit_SES$residuals)
+values = fit_SES$mean
+error_ses = milk_ts_validation - values
+rmse(error_ses)
+MAPE(error_ses,milk_ts_validation)
+cbind(milk_ts_validation, values, error_ses)
+
+```
+
+
+```{r HOLTS = DEFINE RMSE & MAPE FUNCTION}
+
+rmse = function(error_holts){
+  sqrt(mean(error_holts^2))
+}
+MAPE = function(error_holts,V1){
+  mean(abs(error_holts/V1))*100  
+}
+
+```
+
+
+```{r HOLT's EXPONENTIAL SMOOTHING}
+
+fit_holt = holt(milk_ts_train, h=12)
+summary(fit_holt)
+plot(forecast(fit_holt))
+values_holt = fit_holt$mean
+error_holts = milk_ts_validation - values_holt
+rmse(error_holts)
+MAPE(error_holts, milk_ts_validation)
+cbind(birthvalidation,values,error_holt)
+
+```
+
+```{r DESEASONALIZE TIME SERIES}
+
+# We can also deseasonalize time series before using Holt's exponential smoothing
+decompose_milk = decompose(milk_hw_ts, "additive")
+adjust_milk = milk_hw_ts - decompose_milk$seasonal
+plot(adjust_milk)
+
+fit_holt_deseasonalize = holt(adjust_milk)
+summary(fit_holt_deseasonalize)
+plot(forecast(fit_holt_deseasonalize))
+
+```
+
+```{r HOLT WINTERS = DEFINE RMSE & MAPE FUNCTION}
+
+rmse = function(error_hlt_wintr){
+  sqrt(mean(error_hlt_wintr^2))
+}
+MAPE = function(error_hlt_wintr,V1){
+  mean(abs(error_hlt_wintr/V1))*100  
+}
+
+```
+
+```{r HW - APPLY HOLT WINTERS EXPONENTIAL SMOOTHING METHOD}
+
+milk_train_ts = ts(milk_ts_train, start=c(1962,1), frequency = 12)
+fit_holt_winter = hw(y = milk_train_ts, h=12)
+summary(fit_holt_winter)
+plot(forecast(fit_holt_winter))
+
+# ERROR
+values_HW_mean = fit_holt_winter$mean
+error_hlt_wintr = milk_ts_validation - values_HW_mean
+
+# RMSE
+rmse(error_hlt_wintr)
+
+#MAPE
+MAPE(error_hlt_wintr, milk_ts_validation)
+
+cbind(milk_ts_validation, values_HW_mean, error_hlt_wintr)
+
+# ACF
+acf(fit_holt_winter$residuals)
+
+```
+
+```{r FIT AUTOMATED FORECASTING METHODS}
+
+library(forecast)
+fit_auto = forecast(milk_hw_ts)
+summary(fit_auto)
+#Plot the forecasted values
+plot(forecast(fit_auto))
+acf(fit_auto$residuals)
+
+```
