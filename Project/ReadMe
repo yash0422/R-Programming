@@ -12,3 +12,6 @@ Libraries used: (twitteR) | (ROAuth) | (plyr) | (stringr) | (ggplot2) | (httr) |
 
 Process:
 Authorize Twitter API Access | Tweets Extractions | Data Cleaning | Wordcorpus Cleaning | Build WordCloud | Run Sentiment Analysis
+
+This programme needs 4 more files to run sucessfully:- .gitignore, .httr-oauth, cacert.pem, cacert-pem
+This file are related to API & personal credential with Twitter, so you need to create it of your own.
