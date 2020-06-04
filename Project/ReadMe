@@ -1,0 +1,14 @@
+Sentiment Analysis Project for Aviation G9.
+
+Perform sentiment analysis of flyer of the Airline, what mostly they are expecting and how are they reacting for
+current onboard services they offering.
+
+Packages Used:
+
+R Language & R Studio
+Twitter tweets for last one year
+Libraries used: (twitteR) | (ROAuth) | (plyr) | (stringr) | (ggplot2) | (httr) | (wordcloud) | (RCurl) | (syuzhet) | (SentimentAnalysis)
+(sentimentr) | (tm) | (dplyr) | (SnowballC)
+
+Process:
+Authorize Twitter API Access | Tweets Extractions | Data Cleaning | Wordcorpus Cleaning | Build WordCloud | Run Sentiment Analysis
