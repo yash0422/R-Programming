@@ -1,0 +1,9 @@
+Restaurant Review: Sentiment Analysis & Word of Bag Analysis:
+
+Perform analysis on the restaurant review posted on zomato, for improvement in operations & serving pattern,
+post analysis operator contacted customers to enhance their experience and revised review to increase rating on the aggregator site.
+
+Process:
+Reviews Extractions from Aggregator Site | Data Cleaning | Convert to Dataframe | Create Corpus |
+Convert to Document Term Matrix |  Save DTM to Dataset Conversion | Merge Dataset | Apply Classifier | Apply Confusion 
+Matrix | Run Sentiment Analysis
